@@ -1,0 +1,47 @@
+# IDEs
+
+# Netbeans project files
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# IntelliJ project files
+*.iml
+*.iws
+*.ipr
+.idea/
+out/
+
+# Eclipse project file
+.settings/
+.classpath
+.project
+
+# Maven
+target/
+
+# Compiled class file
+*.class
+
+# Binaries
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+*.war
+*.ear
+*.sar
+*.class
+
+# Log files
+*.log
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
