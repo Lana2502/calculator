@@ -1,3 +1,5 @@
+package com.vsuet.uits.sveta;
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -24,6 +26,8 @@ class CalculatorFrame extends JFrame {
 }
 
 class CalculatorPanel extends JPanel {
+
+
     CalculatorPanel() {
         setLayout(new BorderLayout());
 
@@ -53,15 +57,23 @@ class CalculatorPanel extends JPanel {
         addButton("6", insert);
         addButton("*", command);
         addButton("→", e -> {
-            // получить текст с экрана, проверить есть ли там 0, если 0 ничего не делаем, если не 0, то отрезаем последний символ и помешаем на экран
+            String t = display.getText();
+
+            if (t.isEmpty()) {
+                display.setText("0");
+            } else {
+                display.setText(t.substring(0, t.length() - 1));
+            }
         });
+
 
         addButton("1", insert);
         addButton("2", insert);
         addButton("3", insert);
         addButton("-", command);
         addButton("±", e -> {
-            //взять с экрана текст, если он начинается с -, то убрать -, если начин. не с -, то дописать в начало
+            String temp = display.getText();
+            display.setText("-" + temp);
         });
 
 
@@ -70,8 +82,15 @@ class CalculatorPanel extends JPanel {
         addButton("=", command);
         addButton("+", command);
         addButton("x²", e -> {
-            // взять текст с экрана и умножить на себя, вернуть на экран
+            if (display.getText().equals("")) {
+                display.setText("");
+            } else {
+                double a = Math.pow(Double.parseDouble(display.getText()), 2);
+                display.setText("");
+                display.setText(display.getText() + a);
+            }
         });
+
 
         add(panel, BorderLayout.CENTER);
     }
@@ -81,6 +100,7 @@ class CalculatorPanel extends JPanel {
         button.addActionListener(listener);
         panel.add(button);
     }
+
 
     private class InsertAction implements ActionListener {
         public void actionPerformed(ActionEvent event) {
