@@ -27,7 +27,6 @@ class CalculatorFrame extends JFrame {
 
 class CalculatorPanel extends JPanel {
 
-
     CalculatorPanel() {
         setLayout(new BorderLayout());
 
@@ -161,26 +160,4 @@ class CalculatorPanel extends JPanel {
     private String lastCommand;
     private boolean start;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
