@@ -7,7 +7,7 @@ import javax.swing.*;
 public class Calculator {
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
-            CalculatorFrame frame = new CalculatorFrame();
+            final CalculatorFrame frame = new CalculatorFrame();
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
         });
@@ -29,13 +29,8 @@ class CalculatorPanel extends JPanel {
 
     public CalculatorPanel() {
         setLayout(new BorderLayout());
-
-        result = 0;
-        lastCommand = "=";
-        start = true;
-
-        display = new JTextField("0");
         display.setEnabled(false);
+        display.setFont(new Font("Sans", Font.PLAIN, 18));
         display.setHorizontalAlignment(JTextField.RIGHT);
         add(display, BorderLayout.NORTH);
 
@@ -58,16 +53,17 @@ class CalculatorPanel extends JPanel {
         addButton("→", e -> {
             final String currentDisplayText = display.getText();
 
-            if ("0".equals(currentDisplayText) || currentDisplayText.isEmpty()) {
-                display.setText("0");
-            } else {
+            // Если на экране один элемент заменяем его на 0
+            if (currentDisplayText.length() == 1) {
+              display.setText("0");
+
+            } else { // иначе, отрезаем
                 final String decreasedNumberString =
                     currentDisplayText.substring(0, currentDisplayText.length() - 1);
 
                 display.setText(decreasedNumberString);
             }
         });
-
 
         addButton("1", insert);
         addButton("2", insert);
@@ -78,15 +74,18 @@ class CalculatorPanel extends JPanel {
             display.setText("-" + temp);
         });
 
-
         addButton("0", insert);
-        addButton(".", insert);
-        addButton("=", command);
+        addButton(".", e -> {
+          // Если точки на экране нет -- дописываем
+          if (!display.getText().contains(".")) {
+            display.setText(display.getText() + ".");
+          }
+        });
+        addButton("=", e -> calculate());
         addButton("+", command);
         addButton("x²", e -> {
             display.setText(String.valueOf(Math.pow(Double.parseDouble(display.getText()), 2)));
         });
-
 
         add(panel, BorderLayout.CENTER);
     }
@@ -97,64 +96,92 @@ class CalculatorPanel extends JPanel {
         panel.add(button);
     }
 
-
     private class InsertAction implements ActionListener {
         public void actionPerformed(ActionEvent event) {
             final String input = event.getActionCommand();
-            if (start) {
-                display.setText("");
-                start = false;
+
+            // Для начала проверим: нужно ли нам чистить экран?
+            // Если да (тоже самое что shouldCleanTheScreen == true)
+            // А то ты можешь написать такое, да :)
+            // если на экране просто ноль, тоже заменями
+            // содержимое экрана на то что ввели
+            if (shouldCleanTheScreen || "0".equals(display.getText())) {
+              display.setText(input);
+              // Все теперь чистить при вводе экран нельзя:
+              // Так как мы ждем следующий ввод
+              shouldCleanTheScreen = false;
+            } else { // А если что-то есть дописываем
+              display.setText(display.getText() + input);
             }
-            if (input.equals(".")) {
-                if (!display.getText().contains(".")) {
-                    display.setText(display.getText() + input);
-                }
-            } else
-                display.setText(display.getText() + input);
         }
     }
 
     private class CommandAction implements ActionListener {
         public void actionPerformed(ActionEvent event) {
-            String command = event.getActionCommand();
-            if (start) {
-                if (command.equals("-")) {
-                    display.setText(command);
-                    start = false;
-                } else lastCommand = command;
-            } else {
-                calculate(Double.parseDouble(display.getText()));
-                lastCommand = command;
-                start = true;
-            }
+            // Итак, была нажата кнопка с бинарным оператором:
+            // Сначала мы устанавливаем значение переменной оператор:
+            operator = event.getActionCommand();
+            // Теперь записываем в переменную с памятью предыдущее значение
+            // экрана
+            memory = Double.parseDouble(display.getText());
+
+            // Экран теперь можно чистить
+            shouldCleanTheScreen = true;
+
+            // Оператор мы запомнили предыдущее состояние тоже ждем новый ввод
+            // и нажатия =
         }
     }
 
-    private void calculate(double x) {
-        switch (lastCommand) {
-            case "+":
-                result += x;
-                break;
-            case "-":
-                result -= x;
-                break;
-            case "*":
-                result *= x;
-                break;
-            case "/":
-                result /= x;
-                break;
-            case "=":
-                result = x;
-                break;
+
+    // Отрабатывает при нажатии кнопки =
+    private void calculate() {
+        // Получаем с экрана значение второго оператда
+        final double secondOperand = Double.parseDouble(display.getText());
+
+        // И теперь поступаем в зависимости от операнда:
+        switch (operator) {
+          case "+":
+              memory += secondOperand;
+              break;
+          case "-":
+              memory -= secondOperand;
+              break;
+          case "*":
+              memory *= secondOperand;
+              break;
+          case "/":
+              memory /= secondOperand;
+              break;
+
+          // Случай по-умолчанию: ничего не делаем
+          default:
+              break;
         }
-        display.setText("" + result);
+
+        // Таким способом мы конвертируем double примитив к строке
+        final String stringResult = String.valueOf(memory);
+
+        // Если наше число целое, зачем тащить .0?
+        if (stringResult.endsWith(".0")) // удаляем 2 последних символа
+          display.setText(stringResult.substring(0, stringResult.length() - 2));
+        else // А если не целое, то ставим что есть
+          display.setText(stringResult);
     }
 
-    private JTextField display;
-    private JPanel panel;
-    private double result;
-    private String lastCommand;
-    private boolean start;
+    private final JTextField display = new JTextField("0");
+    private final JPanel panel;
+
+    // Устанавливается в истину когда надо почистить экран, например
+    // после того как мы нажали кнопку с оператором.
+    private boolean shouldCleanTheScreen = false;
+
+    // Вообще под это дело хорошо использовать enum. Но будем делать быстро
+    // и грязно:
+    private String operator;
+
+    // Эта переменная будет содержать в себе предыдущий результат экрана
+    // После того как мы нажмем кнопку с операцией
+    private double memory = 0;
 }
 
