@@ -19,7 +19,7 @@ class CalculatorFrame extends JFrame {
         setTitle("Calculator");
         setBounds(250, 250, 350, 350);
         setResizable(false);
-        CalculatorPanel panel = new CalculatorPanel();
+        final CalculatorPanel panel = new CalculatorPanel();
         add(panel);
         pack();
     }
@@ -27,7 +27,7 @@ class CalculatorFrame extends JFrame {
 
 class CalculatorPanel extends JPanel {
 
-    CalculatorPanel() {
+    public CalculatorPanel() {
         setLayout(new BorderLayout());
 
         result = 0;
@@ -39,8 +39,8 @@ class CalculatorPanel extends JPanel {
         display.setHorizontalAlignment(JTextField.RIGHT);
         add(display, BorderLayout.NORTH);
 
-        ActionListener insert = new InsertAction();
-        ActionListener command = new CommandAction();
+        final ActionListener insert = new InsertAction();
+        final ActionListener command = new CommandAction();
 
         panel = new JPanel();
         panel.setLayout(new GridLayout(4, 5));
@@ -56,12 +56,15 @@ class CalculatorPanel extends JPanel {
         addButton("6", insert);
         addButton("*", command);
         addButton("→", e -> {
-            String t = display.getText();
+            final String currentDisplayText = display.getText();
 
-            if (t.isEmpty()) {
+            if ("0".equals(currentDisplayText) || currentDisplayText.isEmpty()) {
                 display.setText("0");
             } else {
-                display.setText(t.substring(0, t.length() - 1));
+                final String decreasedNumberString =
+                    currentDisplayText.substring(0, currentDisplayText.length() - 1);
+
+                display.setText(decreasedNumberString);
             }
         });
 
@@ -81,13 +84,7 @@ class CalculatorPanel extends JPanel {
         addButton("=", command);
         addButton("+", command);
         addButton("x²", e -> {
-            if (display.getText().equals("")) {
-                display.setText("");
-            } else {
-                double a = Math.pow(Double.parseDouble(display.getText()), 2);
-                display.setText("");
-                display.setText(display.getText() + a);
-            }
+            display.setText(String.valueOf(Math.pow(Double.parseDouble(display.getText()), 2)));
         });
 
 
@@ -95,7 +92,7 @@ class CalculatorPanel extends JPanel {
     }
 
     private void addButton(String label, ActionListener listener) {
-        JButton button = new JButton(label);
+        final JButton button = new JButton(label);
         button.addActionListener(listener);
         panel.add(button);
     }
@@ -103,7 +100,7 @@ class CalculatorPanel extends JPanel {
 
     private class InsertAction implements ActionListener {
         public void actionPerformed(ActionEvent event) {
-            String input = event.getActionCommand();
+            final String input = event.getActionCommand();
             if (start) {
                 display.setText("");
                 start = false;
